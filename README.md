@@ -146,3 +146,6 @@ Des configurations de l'ensemble des plugins qu'il va executer et le systeme d'a
 10. Le dossier var contient le cache pour optimiser les vues
 11. Le dossier vendor contient toutes les bibliotheques du projet
 
+## Chapitre 5: Protocole HTTP et Controlleur
+1. Quelle est l'architecture utilisee par Symfony
+![Alt text](architecture_mvc.png?raw=true "Title")
