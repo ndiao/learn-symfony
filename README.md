@@ -149,3 +149,33 @@ Des configurations de l'ensemble des plugins qu'il va executer et le systeme d'a
 ## Chapitre 5: Protocole HTTP et Controlleur
 1. Quelle est l'architecture utilisee par Symfony
 ![Alt text](architecture_mvc.png?raw=true "Title")
+2. Demarrer le serveur et envoyer cette requete http://localhost:8000/
+Nous obtenons une erreur 404 car la ressouce appelee n'existe pas encore.
+3. Creer un controlleur
+```
+> symfony console make:controller
+```
+Creer la classe controlleur et un fichier template qui lui est associe
+   1. Le code la classe controlleur
+```java
+<?php
+
+namespace App\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+
+class FirstController extends AbstractController
+{
+   // Cette annotation dans la version 8 de PHP s'appelle attribut
+    #[Route('/', name: 'app_first')]
+    public function index(): Response
+    {
+        die('Je suis la requete /first');
+        return $this->render('first/index.html.twig', [
+            'controller_name' => 'FirstController',
+        ]);
+    }
+}
+```
