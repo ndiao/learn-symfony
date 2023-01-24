@@ -180,6 +180,7 @@ class FirstController extends AbstractController
 }
 ```
 Cet attribut ```#[Route(...)]``` n'est accessible qu'apartir de la version 8 de PHP.
+
 4. Explications sur la classe AbstractController
 - La methode format permet de passer la main a un autre controlleur.
 - La methode json retourne une donnee sous format json, xml, yaml apartir d'un objet passe en parametre
