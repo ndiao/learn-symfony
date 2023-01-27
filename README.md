@@ -180,8 +180,237 @@ class FirstController extends AbstractController
 }
 ```
 Cet attribut ```#[Route(...)]``` n'est accessible qu'apartir de la version 8 de PHP.
-
+## Chapitre 6: Abstract Controller et la methode render
 4. Explications sur la classe AbstractController
-- La methode format permet de passer la main a un autre controlleur.
-- La methode json retourne une donnee sous format json, xml, yaml apartir d'un objet passe en parametre
+- La methode format() permet de passer la main a un autre controlleur.
+- La methode json() retourne une donnee sous format json, xml, yaml apartir d'un objet passe en parametre
 ![Alt text](serialize.png?raw=true "Title")
+- La methode addFlash() permet d'ajouter des messages Flash avec une duree bien determine
+- La methode render() permet de retouner une vue
+- La methode redirectToRoute() permet de faire des redirections vers une autre controlleur
+
+5. Editer le controlleur FirstController
+
+```java
+<?php
+
+namespace App\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+
+class FirstController extends AbstractController
+{
+    #[Route('/first', name: 'app_first')]
+    public function index(): Response
+    {
+        return $this->render('first/index.html.twig');
+    }
+}
+```
+6. Editer la vue index.html.twig
+```java
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+        <p>Bonjour Symfony 6</p>
+    </div>
+</body>
+</html>
+```
+7. Passer un parametrer a la vue
+   1. Editer le controlleur
+
+```java
+<?php
+
+...
+
+class FirstController extends AbstractController
+{
+    #[Route('/first', name: 'app_first')]
+    public function index(): Response
+    {
+        return $this->render('first/index.html.twig', ['firstName' => 'Lamine', 'lastName' => 'Ndiaye']);
+    }
+}
+
+```
+   2. Editer la vue
+
+```java
+...
+<body>
+    <div>
+        <p>Bonjour {{firstName}} {{lastName}}</p>
+    </div>
+</body>
+</html>
+```
+### Exercice d'application
+1. Creer un controlleur secret() qui genere des nombres entiers aleatoires compris en 0 et 9;
+2. Le controlleur redirige vers le controlleur  first si nombre aleatoire genere est egale a 3.
+3. Quelle est la difference entre redirectToRoute() et forward()?
+
+### Solution
+1. Reponse 1 et 2
+
+```java
+<?php
+
+namespace App\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+
+class FirstController extends AbstractController
+{
+    #[Route('/first', name: 'app_first')]
+    public function index(): Response
+    {
+        return $this->render('first/index.html.twig', ['firstName' => 'Lamine', 'lastName' => 'Ndiaye']);
+    }
+
+    #[Route('/secret', name: 'secret')]
+    public function secret(): Response
+    {
+        $x = random_int(0, 9);
+        if($x == 3){
+            return $this->redirectToRoute('app_first');
+        }
+        return $this->render('first/secret.html.twig', ['x' => $x]);
+    }
+}
+```
+2. Reponse 3
+
+```java
+<?php
+
+namespace App\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+
+class FirstController extends AbstractController
+{
+    #[Route('/first', name: 'app_first')]
+    public function index(): Response
+    {
+        return $this->render('first/index.html.twig', ['firstName' => 'Lamine', 'lastName' => 'Ndiaye']);
+    }
+
+    #[Route('/secret', name: 'secret')]
+    public function secret(): Response
+    {
+        $x = random_int(0, 9);
+        if($x == 3){
+            return $this->forward('App\\Controller\\FirstController::index');
+        }
+        return $this->render('first/secret.html.twig', ['x' => $x]);
+    }
+}
+```
+## Chapitre 7: Recuperer les parametres d'une route et l'objet request dans un controlleur
+1. Dire Bonjour avec le prenom et le nom de la personne passee en parametre
+
+```java
+   #[Route('/first/{firstName}/{lastName}', name: 'app_first')]
+   public function index($firstName, $lastName): Response
+    {
+        return $this->render('first/index.html.twig', ['firstName' => $firstName, 'lastName' => $lastName]);
+    }
+```
+2. Decouverte de l'objet Request
+
+```java
+   #[Route('/first/{firstName}/{lastName}', name: 'app_first')]
+    public function index(Request $request, $firstName, $lastName): Response
+    {
+        dd($request);
+        return $this->render('first/index.html.twig', ['firstName' => $firstName, 'lastName' => $lastName]);
+    }
+```
+- Tester http://localhost:8000/first/Ndiao/Fall
+- Tester http://localhost:8000/first/Ndiao/Fall?msg=salut
+
+## Chapitre 8: Gestion des sessions
+- Une des fonctionnalites de base d'un controlleur est la manipulation des **sessions**.
+- Un objet **session** est fourni avec l'objet **Request**.
+- La methode **getSession()** permet de recuperer la session.
+- L'objet **Session** fournit deux methodes: **get()** pour recuperer une variable de session et **set()** pour la modifiation ou l'ajout.
+- **get()** prend en parametre la variable de session
+- **set()** prend en entree deux parametres la **clef** et la **valeur**.
+- Au niveau de la vue (TWIG), on recupere les parametres de la session avec la methode ```**app.session.get('nom_du_parametre')**```
+
+Les methodes existantes:
+- **all()** : retourne tous les attributs de la session dans un tableau sous forme de {clef, valeur}
+- **has()** : permet de verifier si un attribut existe dans la session
+- **replace()** : permet de remplacer le contenu de la session par un tableau de {clef, valeur}
+- **remove()** : efface un attribut d'une cle donnee
+- **clear()** : efface tous les attributs
+
+1. Creer un controlleur SessionController
+
+```
+$ symfony console make:controller
+```
+2. Compter le nombre de fois que l'internaute a visite une page
+   1. Editer SessionController
+
+```java
+<?php
+
+namespace App\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+
+class SessionController extends AbstractController
+{
+    #[Route('/session', name: 'app_session')]
+    public function index(Request $request): Response
+    {
+        $session = $request->getSession();
+        if($session->has('nbVisite')){
+            $nbVisite = $session->get('nbVisite') + 1;
+        } else {
+            $nbVisite = 1;
+        }
+        $session->set('nbVisite', $nbVisite);
+        return $this->render('session/index.html.twig', [
+            'controller_name' => 'SessionController',
+        ]);
+    }
+}
+```
+   2. Editer session\index.html.twig
+
+```java
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+        <p>Bonjour, c'est votre visite numero : {{app.session.get('nbVisite')}}</p>
+    </div>
+</body>
+</html>
+```
